@@ -8,11 +8,19 @@ Created on Tue Jul 17 12:32:48 2018
 
 #import geopandas as gpd
 import pandas as pd
-from shapely.geometry import Polygon
+import contextily as ctx
+from shapely.geometry import Point, Polygon
+from IPython.display import IFrame
+import matplotlib.pyplot as plt
 import folium
-from math import radians, sin, cos, asin, sqrt
+import seaborn as sns
+import numpy as np
+import pprint
+from math import *
 
-link_install_folium = 'https://www.kdnuggets.com/2018/09/visualising-geospatial-data-python-folium.html'
+import json
+from shapely.geometry import shape, mapping
+import branca.colormap as cm
 
 def haversine(lon1, lat1, lon2, lat2):
     """
@@ -73,6 +81,7 @@ def squareize(lon_c, lat_c, step_lon, step_lat):
 
 
 def createGeoJson(row, metric):
+    
     areaID = row["id"]
     polygon = row["geometry"]
     lon, lat = polygon.exterior.coords.xy
@@ -87,106 +96,79 @@ def createGeoJson(row, metric):
     centroid = [row["Lat"], row["Lon"]]
     nop = int(row[metric])
     
-    return zoneid, centroid, mysquare
-
+    return zoneid, nop,centroid, mysquare
 
 city = "Torino"
-metric = "max-parking
+metric = "AvgTime"
 
 '''
 Upload the data (zones & solutions)
 '''
-zones = pd.read_csv("./data/Torino_car2go_ValidZones.csv")
-fp = open('data/CS_placement.txt')
-solutions = fp.read()[1:-1].replace(' ', '').split(',')
-for i in range(len(solutions)):
-    solutions[i] = int(solutions[i])
+df = pd.read_csv("./data/Torino_car2go_ValidZones.csv")
 
 '''
 find the step in degrees for 500m
 '''
-step_lon, step_lat, step = find_steps(zones.iloc[132]['Lon'],
-                                      zones.iloc[132]['Lat'],
+step_lon, step_lat, step = find_steps(df.iloc[132]['Lon'],
+                                      df.iloc[132]['Lat'],
                                       501,
                                       0.00001)
-'''
-creation of square from centroids
-Zones with CS
-'''
-zones['geometry']=zones.apply(
-        lambda x: squareize(x.Lon, x.Lat, step_lon, step_lat),
-        axis=1)
-CS_in_sol = zones[zones.id.isin(solutions)]
 
 '''
-Covert the zones DF into an GeoJson file
+creation of square from centroids
 '''
+df['geometry']=df.apply(
+        lambda x: squareize(x.Lon, x.Lat, step_lon, step_lat),
+        axis=1)
+
+
+
 outGeoJson = {"type": "FeatureCollection",
               "features":[]
         }
 f = open("./data/"+city+"squares.json", 'w')
-for i in range(len(zones)):
-    a,b,c = createGeoJson(zones.iloc[i], metric)
+
+for i in range(len(df)):
+    if df.iloc[i]['id'] < 0: continue
+    a,b,c,d = createGeoJson(df.iloc[i], metric)
     geoZone = {}
     geoZone["type"] = "Feature"
     geoZone["zone"] = float(a)
+    geoZone["properties"] = {metric:b}
     geoZone["geometry"] = {}
     geoZone["geometry"]["type"] = "Polygon"
     geoZone["geometry"]["coordinates"] = []
-    geoZone["geometry"]["coordinates"].append(c)
+    geoZone["geometry"]["coordinates"].append(d)
     outGeoJson["features"].append(geoZone)
+    
+linear = cm.LinearColormap(
+    ['b', 'c', 'g', 'y', 'r'],
+    vmin=df[metric].quantile(0.01), 
+    vmax=df[metric].quantile(0.95),
+    caption = 'Number of Parkings'
+)
+maxparking_dict = df.set_index("id")[metric]
 
-'''
-Draw on the map a gray square
-'''
-lat = zones.loc[136]["Lat"]
-lon = zones.loc[136]["Lon"]
+lat = df.loc[136]["Lat"]
+lon = df.loc[136]["Lon"]
 map_5 = folium.Map(location=[lat,lon], zoom_start=12.25, )
 folium.GeoJson(
     outGeoJson,
     style_function=lambda feature: {
-        'fillColor': 'gray' ,
+        'fillColor': linear(maxparking_dict[ feature['zone'] ]),
         'color': 'black',
-        'fillOpacity':0.2,
+        'fillOpacity':0.7,
         'weight': 1,
+#        'dashArray': '5, 5'
     }
 ).add_to(map_5)
+#map_5.add_child(linear)
 
 
-'''
-Covertion of CS df into GeoJson
-'''
-outGeoJson = {"type": "FeatureCollection",
-              "features":[]
-        }
-f = open("./data/"+city+"squares_CS.json", 'w')
-for i in range(len(CS_in_sol)):
-    a,b,c = createGeoJson(CS_in_sol.iloc[i], metric)
-    geoZone = {}
-    geoZone["type"] = "Feature"
-    geoZone["zone"] = float(a)
-    geoZone["geometry"] = {}
-    geoZone["geometry"]["type"] = "Polygon"
-    geoZone["geometry"]["coordinates"] = []
-    geoZone["geometry"]["coordinates"].append(c)
-    
-    outGeoJson["features"].append(geoZone)
-
-'''
-Draw on the map the CS coloring the zone with green
-'''
-folium.GeoJson(
-    outGeoJson,
-    style_function=lambda feature: {
-        'fillColor': 'green' ,
-        'color': 'black',
-        'fillOpacity':0.9,
-        'weight': 1,
-    }
-).add_to(map_5)
-
-
-map_5.save("./images/"+city+"_placement.html")
+m = map_5
+m.save("./images/"+city+"_"+metric+".html")
+m
+#
 
 
 

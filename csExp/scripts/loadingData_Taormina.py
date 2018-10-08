@@ -30,6 +30,7 @@ from plotter.plotMetricVsZones_policy import *
 from plotter.metricVaryingZonesAndACs_city import * 
 from plotter.plotMetricVsZones_policy_p import *
 from plotter.aggregateBookingsPerDay import *
+from plotter.plotDeaths_with_zoom import *
 
 from DownloadFiles import *
 import subprocess
@@ -104,7 +105,8 @@ def downloadAllStuff(c2id,rnd2id) :
         
         print ("LS", lastS)
         ## FIX - ME dld here function
-        'car2go_Hybrid_max-parking_21_4_25_1000000_100_0.txt'
+
+
 
 #        print (log0_name)
 #        log_df[city] = pd.read_csv("../data"+city+"/"+log0_name, sep=";", 
@@ -177,68 +179,48 @@ metrics = ["AmountRechargePerc", "AvgSOC",
            "ReroutePerc", "TravelWithPenlaty", 
           "AvgWalkedDistance"]
 
-#metrics=['AmountRechargePerc']
 
 #
 #cdfList_bdst, cdfList_bdur, cdfList_pdur, dict_df, log_df,\
 #plt_home, path, mytt =  downloadAllStuff(c2id, rnd2id)
 
-#cdfList_bdst, cdfList_bdur, cdfList_pdur,\
-# dict_df, log_df, mytt = uploadFromSSDallStuff(c2id, rnd2id)
-# 
+cdfList_bdst, cdfList_bdur, cdfList_pdur,\
+dict_df, log_df, mytt = uploadFromSSDallStuff(c2id, rnd2id)
 
-#for city in ['Torino']:
-#    
+
+for city in ['Torino']:
+    
 #    cdfList_bdst[city] = computeCDF(log_df[city], "RentalsDistance", city) 
 #    cdfList_pdur[city] = computeCDF(log_df[city], "ParkingsDuration", city)
+    
+#    plotCDF(cdfList_bdst[city], 'RentalsDistance', save=True, city=city, path="../plots/" )
+#    plotCDF(cdfList_pdur[city], 'ParkingsDuration', save=True, city=city, path="../plots/" )
+
 ##    
-#    plotDeathProb(dict_df[city], city=city, tt=25, acs=4, save=False, onlyFF=True,
-#                  path="../plot%s/"%city)
+#    plotDeathProb(dict_df[city], city=city, tt=25, acs=4, save=True, onlyFF=True,
+#                  path="../plots/")
 
-#    plotCDF(cdfList_bdst[city], 'RentalsDistance', save=False, city=city, path="../plotTorino/" )
-#    plotCDF(cdfList_pdur[city], 'ParkingsDuration', save=False, city=city, path="../plotTorino/" )
     
-#    pdfChargingTimeVsAlgorithm(dict_df[city], save=False, cdf=True)  ##FIX - ME
+#    pdfChargingTimeVsAlgorithm(log_df[city], save=False, cdf=True)
 
 
-##
-###    
-#    zzz = plotMetricVsZones_policy(dict_df[city],city, acs=4, tt=25, p=100,
-#                                 metric='Deaths', save=False, freeFloating=True, k=250, 
-#                                 path='../plot%s/'%city) ##FIX - ME
-###
-###    
+
+#    plotDeaths_with_zoom(init_df=dict_df[city], acs=4, tt=25,
+#                                        metric='Deaths', city=city, save=True,
+#                                        path="../plots/", ax="")
+    
 #    for m in metrics:
-#        plotMetricVsZones_policy_p(init_df=dict_df[city], acs=4, tt=25,
-#                                        plist=[0],metric=m, city=city, save=False,
-#                                        freeFloating=False, path="../plot"+city+"/cut_", ax="")
-####        
-####        
-##
-#aggreatePerCityCDF(cdfList_bdst, "RentalsDistance", save=True, path="../plotAggregated/", ax=None)
-#aggreatePerCityCDF(cdfList_bdur, "RentalsDuration", save=True, path="../plotAggregated/", ax=None)
-#aggreatePerCityCDF(cdfList_pdur, "ParkingsDuration", save=True, path="../plotAggregated/", ax=None)
-#aggregateMetricVsZones_city(dict_df, save=True, path="../plotTorino/")
-#aggregateUtilizastionPerHour(['Vancouver', "Berlino", "Milano", "Torino"], 
-#                             save=True, path='../plotAggregated/')
-
-#aggregateBookingsPerDay(save=False, path="../plotAggregated/")
-#aggregateFleetPerDay(save=False, path="../plotAggregated/")
-
-  
-    
-#c2id = {"Torino":41, "Berlino":42, "Milano":43, "Vancouver":44}
-#rnd2id={}
-#cdfList_bdst, cdfList_bdur, cdfList_pdur, dict_df, log_df,\
-#plt_home, path, mytt =  downloadAllStuff(c2id, rnd2id)
-#cdfList_bdst, cdfList_bdur, cdfList_pdur,\
-#dict_df, log_df, mytt = uploadFromSSDallStuff(c2id, rnd2id)
-
-#metricVaryingZonesAndAcs_city(dict_df, 'Deaths', save=False, path='../plotAggregated/50_')
-#metricVaryingZonesAndAcs_city(dict_df, 'AvgTimeInStation', save=True, path='../plotAggregated/50_')
-#metricVaryingZonesAndAcs_city(dict_df, 'ReroutePerc', save=True, path='../plotAggregated/50_')
-#metricVaryingZonesAndAcs_city(dict_df, 'AvgWalkedDistance', save=True, path='../plotAggregated/50_')
-
+#        zzz=plotMetricVsZones_policy_p(init_df=dict_df[city], acs=4, tt=25,
+#                                        plist=[0],metric=m, city=city, save=True,
+#                                        freeFloating=True, path="../plots/", ax="")
+        
+    plotMetricVsTT_policy(init_df= dict_df[city], 
+                   z=21,
+                   acs=4, 
+                   algorithm='max-parking', 
+                   metric='ReroutePerc', 
+                   save=True, 
+                   path="../plots/")
 
 
 

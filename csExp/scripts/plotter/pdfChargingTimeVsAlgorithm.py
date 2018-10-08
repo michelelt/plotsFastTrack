@@ -8,10 +8,63 @@ Created on Thu Aug 16 13:26:12 2018
 
 from plotter.header import *
 from plotter.numberOfZones import *
+import subprocess
+import pandas as pd
+
+
+
+
 
 def pdfChargingTimeVsAlgorithm(dataset, save=False, cdf=True):
-    algorithms = ["avg-time","max-parking"]
+    
+    algorithms = ["avg-time", "max-parking"]
     title = "CDF_parking_time_per_algorithm"+".pdf"
+    dataset_d = {}
+    city='Torino'
+    
+
+    try:
+        log0_name = 'car2go_Hybrid_max-parking_21_4_25_1000000_100_0.txt'
+        dataset_mp = pd.read_csv("../data"+city+"/"+log0_name, sep=";", 
+                                       skiprows=[0,1,2,3,4,5,6,7,8,9])
+        dataset_d['max-parking'] = dataset_mp
+        
+        log0_name = 'car2go_Hybrid_avg-time_21_4_25_1000000_100_0.txt'
+        dataset_at = pd.read_csv("../data"+city+"/"+log0_name, sep=";", 
+                                       skiprows=[0,1,2,3,4,5,6,7,8,9])
+        dataset_d['avg-time'] = dataset_at
+    except:
+        bashCommand = "ssh cocca@bigdatadb "+\
+              "hdfs dfs -cat "+\
+              "Simulator/output/Simulation_"+ str(6) +"/"+\
+              'car2go_Hybrid_max-parking_21_4_25_1000000_100_0.txt'
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        strOutput =  output.decode("utf-8") 
+        fp1 = open('../../dataTorino/car2go_Hybrid_max-parking_21_4_25_1000000_100_0.txt', 'w')
+        fp1.write(strOutput) 
+        f.close()
+        
+        
+        bashCommand = "ssh cocca@bigdatadb "+\
+                      "hdfs dfs -cat "+\
+                      "Simulator/output/Simulation_"+ str(6) +"/"+\
+                      'car2go_Hybrid_avg-time_21_4_25_1000000_100_0.txt'
+        process = subprocess.Popen(bashCommand.split(), stdout=subprocess.PIPE)
+        output, error = process.communicate()
+        strOutput =  output.decode("utf-8") 
+        fp1 = open('../../dataTorino/car2go_Hybrid_avg-time_21_4_25_1000000_100_0.txt', 'w')
+        fp1.write(strOutput) 
+        
+        log0_name = 'car2go_Hybrid_max-parking_21_4_25_1000000_100_0.txt'
+        dataset_mp = pd.read_csv("../data"+city+"/"+log0_name, sep=";", 
+                                       skiprows=[0,1,2,3,4,5,6,7,8,9])
+        dataset_d['max-parking'] = dataset_mp
+        
+        log0_name = 'car2go_Hybrid_avg-time_21_4_25_1000000_100_0.txt'
+        dataset_at = pd.read_csv("../data"+city+"/"+log0_name, sep=";", 
+                                       skiprows=[0,1,2,3,4,5,6,7,8,9])
+        dataset_d['avg-time'] = dataset_at
     
     fig, ax = plt.subplots(1,1,figsize=(6,4))
     ax.set_xlabel("Plugged time [h]", fontsize=ax_lab_fontsize)
@@ -26,12 +79,13 @@ def pdfChargingTimeVsAlgorithm(dataset, save=False, cdf=True):
     ax.grid()
     
     for a in algorithms :
-        
+        dataset = dataset_d[a]
         test = dataset[dataset["StartRecharge"] > 0]
         test["parkingTime"] = test["Stamp"] - test["StartRecharge"]
+
         
         values = test["parkingTime"].div (3600)
-        values = test["Recharge"]
+#        values = test["Recharge"]
         values = values[values < values.quantile(0.99)]
         values.tolist()
         print (len(values),a)
@@ -41,7 +95,7 @@ def pdfChargingTimeVsAlgorithm(dataset, save=False, cdf=True):
                 label=my_labels[a], 
                 color=colors_dict[a], 
                 linewidth=2, 
-                markevery=mylists[a],
+#                markevery=mylists[a],
                 marker=mymarker[a])
         print("aaa")
         

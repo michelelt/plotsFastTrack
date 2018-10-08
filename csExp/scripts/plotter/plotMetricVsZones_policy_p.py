@@ -21,14 +21,12 @@ def plotMetricVsZones_policy_p(init_df, acs, tt, plist,
                              metric, save=False, freeFloating=True, 
                              k=250, city="", path="", ax=""):
     
-    title = city+ "_" + metric + "VsZones_Policy_" + str(acs) + str(acs) + "_tt-"+str(25) + "_" +\
-    str(len(plist)) + ".pdf"
+    title = city+ "_H_NN" + metric + ".pdf"
     print (title)
     
     df = init_df[init_df["Acs"] == acs]
 #    df = df[df["Zones"] >= 4]
-    if freeFloating == False:
-        df = df[(df["Policy"] == "Needed") | (df["Policy"] == "Hybrid")]
+    df = df[(df["Policy"] == "Needed") | (df["Policy"] == "Hybrid")]
 
     x = df.Zones.unique()   
     nz = numeberOfZones(city)
@@ -44,18 +42,19 @@ def plotMetricVsZones_policy_p(init_df, acs, tt, plist,
     ax.set_ylabel(my_labels[metric], fontsize=ax_lab_fontsize+5)
 
             
-    if metric != 'Deaths' : ax.set_xlim([5,31])
+    if metric != 'Deaths' : ax.set_xlim([0,31])
     else : ax.set_xlim([0,31])
 
     i = 0
     df = df[(df["TankThreshold"] == tt)]
     
     for policy in df.Policy.sort_values(ascending=False).unique():
+        print (policy)
         for p in plist :
             if "Hybrid" in policy :
                 tmp = df[(df["TankThreshold"] == tt) 
                          & (df["Policy"] == policy) 
-                         & (df["pThreshold"] == p)
+                         & (df["pThreshold"] == 0)
                          ]
 
             elif "Needed" in policy and p == 0 :
@@ -102,7 +101,7 @@ def plotMetricVsZones_policy_p(init_df, acs, tt, plist,
                     left, bottom, width, height = [0.30, 0.40, 0.45, 0.35]
                     ax2 = fig.add_axes([left, bottom, width, height])
                     
-                    ax2.set_xlim(zoom_deaths[city])
+                    ax2.set_xlim(3,6)
                     if city != 'Berlino':
                         ax2.set_ylim(bottom=10e-6, top=10e-2)
                     

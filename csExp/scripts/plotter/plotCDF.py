@@ -17,7 +17,6 @@ Description:
 
 
 def plotCDF(dataset, metric, save=False, city="", path="" ):
-    title = "CDF_" +city+ "_" + metric+".pdf"
     fig, ax = plt.subplots(1,1,figsize=(9,3))
     ax.grid()
     
@@ -39,7 +38,8 @@ def plotCDF(dataset, metric, save=False, city="", path="" ):
         ax.set_xlim(left=700, right=xmax)
         ax.set_xticks([700, 1000, 5000, 10000, xmax])
         ax.set_xticklabels(["0.7 km", "1 km", "5 km", "10 km", str(round(xmax/1000))+" km" ])
-        
+        title = "CDF_distance.pdf"
+
     elif metric == "ParkingsDuration":
         print(2)
         ax.set_xlabel("Parkings Duration", fontsize=ax_lab_fontsize)
@@ -47,6 +47,7 @@ def plotCDF(dataset, metric, save=False, city="", path="" ):
         ax.set_xticks([0.083,0.33,1,5,12,24,48])
         ax.set_xticklabels(["5 min","20 min","1 h","5 h","12 h","1 d","2 d"])
         ax.set_xlim(0.083, 48)
+        title = "CDF_duration.pdf"
         
     elif  metric == "RentalsDuration":
         print(3)
@@ -57,6 +58,7 @@ def plotCDF(dataset, metric, save=False, city="", path="" ):
                             "20 min","30 min","40 min",
                             "50 min","1h"])
         ax.set_xlim(0, 60)
+        title = "CDF_duration2.pdf"
     else:
         return
     

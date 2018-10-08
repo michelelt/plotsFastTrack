@@ -20,12 +20,12 @@ Description:
 
 def plotMetricVsTT_policy(init_df, z, acs, algorithm, metric, save=False, path=""):
     
-    title = metric + "VsTT_Policy_acs-"+str(acs) + "_z-"+str(z)+"_algorithm-"+str(metric) +".pdf"
-    
+    title = "Torino_"+metric+"_vs_TT.pdf"    
     df = init_df[init_df["Acs"] == acs]
-    df = df[df["Zones"] == z]
+    df = df[df["Zones"] == 15]
     df = df[df["Algorithm"] == algorithm]
     df = df[(df["Policy"] == "Needed") | (df["Policy"] == "Hybrid")]
+    df = df[df['pThreshold'] == 0]
     
     x = df.TankThreshold.unique()
     
@@ -53,7 +53,7 @@ def plotMetricVsTT_policy(init_df, z, acs, algorithm, metric, save=False, path="
     x = x.tolist()
     x.insert(0,0)
     x = np.array(x)
-    ax.fill_between(x,ymin, ymax, where= x<=15, color='red', alpha=0.2, label="Infeasible trips")
+    ax.fill_between(x,0, ymax, where= x<=15, color='red', alpha=0.2, label="Infeasible trips")
         
 
     plt.legend(bbox_to_anchor=(0., 1.02, 1., .102), loc=3,

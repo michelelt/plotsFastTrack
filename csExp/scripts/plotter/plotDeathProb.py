@@ -34,7 +34,7 @@ def plotDeathProb(init_df, city, tt, acs, save=False, onlyFF=True, path=""):
         
         fig, ax = plt.subplots(1,1,figsize=(9,3))
         ax.grid()
-        title = city+"_zonesVsDeaths_algorithms_acs-"+str(acs)+"_tt-"+str(tt) +"_policy-"+policy+".pdf"
+        title = city+"_FF_deaths_probs.pdf"
         ax.set_xlabel(my_labels["Zones"], fontsize=ax_lab_fontsize)
         ax.set_ylabel(my_labels["Deaths"],fontsize=ax_lab_fontsize)
         ax.set_xlim(0,31)

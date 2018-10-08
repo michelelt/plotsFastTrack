@@ -27,7 +27,10 @@ def plotMetricVsZones_policy(init_df, city, acs, tt,  p,
     if freeFloating == False:
         df = df[(df["Policy"] == "Needed") | (df["Policy"] == "Hybrid")]
     else :
-        df = df[(df["Policy"] == "Needed") | (df["Policy"] == "FreeFloating")]
+        df = df[(df["Policy"] == "Needed") | 
+                (df["Policy"] == "FreeFloating") |
+                (df["Policy"] == "Hybrid")
+                ]
     x = df.Zones.unique()
     x = x*100 / float(numeberOfZones(city))
 
@@ -46,8 +49,12 @@ def plotMetricVsZones_policy(init_df, city, acs, tt,  p,
             tmp = df[(df["TankThreshold"] == tt) & 
                      (df["Policy"] == policy)]
 
-        else :
+        elif "Hybrid" in policy :
             tmp = df[df["Policy"] == policy]
+            tmp = df[df["pThreshold"]==0]
+        else: 
+            tmp = df[df["Policy"] == policy]
+            tmp = df[df["pThreshold"]==1]
 
         for algorithm in ["max-parking"]:
             tmp2 = tmp[tmp["Algorithm"] == algorithm]
